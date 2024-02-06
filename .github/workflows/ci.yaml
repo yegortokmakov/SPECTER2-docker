@@ -9,7 +9,8 @@ on:
       - published
 
 jobs:
-  docker:
+  build-push:
+    name: Build and push image
     runs-on: ubuntu-latest
     steps:
       - name: Cleanup disk
@@ -58,10 +59,19 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+  build_service_api:
+    if: github.event_name == 'release'
+    needs:
+      - build-push
+    name: Update Docker Hub description
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
       - name: Update repo description
-        if: github.event_name == 'release'
         uses: peter-evans/dockerhub-description@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+          short-description: ${{ github.event.repository.description }}
           repository: yegortokmakov/specter2
