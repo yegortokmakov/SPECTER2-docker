@@ -14,8 +14,16 @@ jobs:
   docker:
     runs-on: ubuntu-latest
     steps:
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+      - name: Cleanup disk
+        run: |
+          sudo ls -l /usr/local/lib/
+          sudo ls -l /usr/share/
+          sudo du -sh /usr/local/lib/
+          sudo du -sh /usr/share/
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /usr/share/dotnet
+          sudo du -sh /usr/local/lib/
+          sudo du -sh /usr/share/
 
       - name: Docker meta
         id: meta
@@ -46,7 +54,6 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
-          load: true
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
